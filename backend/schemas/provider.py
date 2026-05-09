@@ -12,5 +12,6 @@ class LLMModelRead(BaseModel):
     id: int
     name: str
     provider_id: int
+    ctx_window: int
 
     model_config = ConfigDict(from_attributes=True)
