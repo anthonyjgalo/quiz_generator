@@ -102,7 +102,7 @@ class QuizGeneration(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     model_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    system_prompt: Mapped[str] = mapped_column(Text, nullable=False)
+    user_instructions: Mapped[str] = mapped_column(Text, nullable=False)
     temperature: Mapped[float] = mapped_column(Float, nullable=False)
     max_tokens: Mapped[int] = mapped_column(Integer, nullable=False)
     provider_name: Mapped[str] = mapped_column(String(50), nullable=False)

@@ -7,7 +7,7 @@ class QuizGenerateRequest(BaseModel):
     provider_name: str
     total_questions: int
     question_distribution: dict
-    system_prompt: str | None = None
+    user_instructions: str | None = None
     temperature: float = 0.7
     max_tokens: int = 1000
 
@@ -24,7 +24,7 @@ class QuizGenerationRead(BaseModel):
     id: int
     model_name: str
     provider_name: str
-    system_prompt: str
+    user_instructions: str
     temperature: float
     max_tokens: int
     questions_config: dict

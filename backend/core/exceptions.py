@@ -14,3 +14,9 @@ class QuestionLimitError(Exception):
     """Raised when requesting too many questions for a short context."""
 
     pass
+
+
+class InsufficientContextError(Exception):
+    """Raised when no relevant context is retrieved for quiz generation."""
+
+    pass

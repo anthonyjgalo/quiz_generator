@@ -3,7 +3,7 @@ from typing import cast
 import chromadb
 import numpy as np
 from chonkie import SemanticChunker
-from chromadb.api.types import Embeddings, Metadatas, Where
+from chromadb.api.types import Embeddings, Metadatas
 
 DOC_VEC_DB_PATH = "../data/doc_vec_db"
 COLLECTION_NAME = "global_knowledge_base"
@@ -20,7 +20,7 @@ chunker = SemanticChunker(
 collection = client.get_or_create_collection(name=COLLECTION_NAME)
 
 
-def process_document_content(doc_id: int, content: str):
+def save_document_content(doc_id: int, content: str):
     chunks = chunker.chunk(content)
 
     valid_chunks = [chunk for chunk in chunks if chunk is not None]
@@ -49,19 +49,17 @@ def process_document_content(doc_id: int, content: str):
     collection.add(ids=ids, documents=doc_ids, embeddings=emb_ids, metadatas=metadatas)
 
 
-def get_document_context(doc_ids: list[int], query_text: str, question_num: int):
+def get_document_context(doc_id: int, query_text: str, question_qty: int):
     query_embeddings = chunker.embedding_model.embed(query_text)
-    n_res = question_num * 3
-
-    filter_dict = {"doc_id": {"$in": doc_ids}}
+    n_res = question_qty * 3
 
     results = collection.query(
         query_embeddings=query_embeddings,
         n_results=n_res,
-        where=cast(Where, filter_dict),
+        where={"doc_id": doc_id},
     )
 
-    return results
+    return results.get("documents", [[]])
 
 
 def delete_document_content(doc_id: int):
