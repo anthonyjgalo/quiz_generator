@@ -20,3 +20,13 @@ class InsufficientContextError(Exception):
     """Raised when no relevant context is retrieved for quiz generation."""
 
     pass
+
+
+class ConnectionTestFailed(Exception):
+    """Raised when a connection test to an LLM provider fails.
+
+    This exception wraps underlying errors (API errors, timeouts, network issues)
+    into a single domain-specific exception for the connection layer.
+    """
+
+    pass
