@@ -1,28 +1,59 @@
-# db/seed.py
 from sqlalchemy.orm import Session
 
-from db.models import LLMProvider
+from db.models import LLMModel, LLMProvider
+
+PROVIDERS_DEFAULT_DATA = [
+    {
+        "name": "OpenAI",
+        "base_url": "https://api.openai.com/v1",
+        "models": [
+            {"name": "gpt-4o", "ctx_window": 128000},
+            {"name": "gpt-4o-mini", "ctx_window": 128000},
+            {"name": "gpt-4.1", "ctx_window": 1048576},
+            {"name": "gpt-4.1-mini", "ctx_window": 1048576},
+        ],
+    },
+    {
+        "name": "DeepSeek",
+        "base_url": "https://api.deepseek.com/v1",
+        "models": [
+            {"name": "deepseek-v4-pro", "ctx_window": 1000000},
+            {"name": "deepseek-v4-flash", "ctx_window": 1000000},
+        ],
+    },
+    {
+        "name": "Gemini",
+        "base_url": "https://generativelanguage.googleapis.com/v1beta/openai/",
+        "models": [
+            {"name": "gemini-2.5-pro", "ctx_window": 1000000},
+            {"name": "gemini-2.5-flash", "ctx_window": 1000000},
+            {"name": "gemini-3-flash", "ctx_window": 1000000},
+            {"name": "gemini-3.1-pro", "ctx_window": 1000000},
+        ],
+    },
+    {"name": "Ollama", "base_url": "http://localhost:11434/v1", "models": []},
+    {"name": "OpenAI Compatible", "base_url": "http://localhost:8080/v1", "models": []},
+]
 
 
 def seed_data(db: Session):
-    if not db.query(LLMProvider).first():
-        providers = [
-            LLMProvider(name="OpenAI", base_url="https://api.openai.com/v1"),
-            LLMProvider(name="Deepseek", base_url="https://api.deepseek.com/v1"),
-            LLMProvider(
-                name="Gemini",
-                base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
-            ),
-            LLMProvider(name="Groq", base_url="https://api.groq.com/openai/v1"),
-            LLMProvider(name="Together AI", base_url="https://api.together.xyz/v1"),
-            LLMProvider(
-                name="Fireworks", base_url="https://api.fireworks.ai/inference/v1"
-            ),
-            LLMProvider(name="Cerebras", base_url="https://api.cerebras.ai/v1"),
-            LLMProvider(name="SambaNova", base_url="https://api.sambanova.ai/v1"),
-            LLMProvider(name="Perplexity", base_url="https://api.perplexity.ai"),
-            LLMProvider(name="xAI", base_url="https://api.x.ai/v1"),
-        ]
+    if db.query(LLMProvider).first():
+        return
 
-        db.add_all(providers)
-        db.commit()
+    for p_data in PROVIDERS_DEFAULT_DATA:
+        provider = LLMProvider(
+            name=p_data["name"],
+            base_url=p_data["base_url"],
+        )
+        db.add(provider)
+        db.flush()
+
+        for m_data in p_data["models"]:
+            model = LLMModel(
+                provider_id=provider.id,
+                name=m_data["name"],
+                ctx_window=m_data["ctx_window"],
+            )
+            db.add(model)
+
+    db.commit()

@@ -42,6 +42,7 @@ class LLMConnection(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
+    base_url: Mapped[str] = mapped_column(String(255), nullable=False)
     api_key: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     model_id: Mapped[int] = mapped_column(ForeignKey("llm_model.id"), nullable=False)
