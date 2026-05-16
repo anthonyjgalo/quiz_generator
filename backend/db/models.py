@@ -57,14 +57,11 @@ class Document(Base):
     source_type: Mapped[str] = mapped_column(
         String(10), nullable=False, default="paste"
     )  # upload | paste
-    format: Mapped[str] = mapped_column(String(10), nullable=False)
+    format: Mapped[str] = mapped_column(String(10), default="txt", nullable=False)
     char_count: Mapped[int] = mapped_column(Integer, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
-    processing_strategy: Mapped[str] = mapped_column(
-        String(10), nullable=False, default="direct"
-    )  # direct | chunked
 
 
 class Workspace(Base):

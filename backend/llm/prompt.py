@@ -3,8 +3,6 @@ from typing import List
 
 from db.models import Document
 
-from llm import rag
-
 DEFAULT_SYSTEM_PROMPT = """
 ### ROLE
 You are a professional Pedagogical Engineer and Technical Assessment Expert. Your goal is to generate high-quality, accurate, and challenging quizzes based on the provided context.
@@ -39,20 +37,22 @@ You MUST respond ONLY with a valid JSON object. Do not include any conversationa
 
 
 def build_context(doc_ids: List[Document], question_qty: int, user_prompt: str):
-    context_parts = []
-
-    for doc in doc_ids:
-        if doc.processing_strategy == "direct":
-            context_parts.append(doc.content)
-        else:
-            chunks = rag.get_document_context(
-                doc.id, user_prompt, question_qty=question_qty
-            )
-            if chunks:
-                for chunk in chunks:
-                    context_parts.append(chunk)
-
-    return "\n".join(context_parts)
+    # context_parts = []
+    #
+    # for doc in doc_ids:
+    #     if doc.processing_strategy == "direct":
+    #         context_parts.append(doc.content)
+    #     else:
+    #         chunks = rag.get_document_context(
+    #             doc.id, user_prompt, question_qty=question_qty
+    #         )
+    #         if chunks:
+    #             for chunk in chunks:
+    #                 context_parts.append(chunk)
+    #
+    # return "\n".join(context_parts)
+    # Todo: this need to improve
+    pass
 
 
 def build_prompt(

@@ -1,7 +1,6 @@
 from pathlib import Path
 
-ALLOWED_EXTENSIONS = {"txt", "pdf", "docx"}
-MAX_SIZE = 10 * 1024 * 1024
+from core.constants import ALLOWED_EXTENSIONS
 
 
 def validate_file(filename: str):
@@ -9,6 +8,8 @@ def validate_file(filename: str):
 
     if ext not in ALLOWED_EXTENSIONS:
         raise ValueError(f"Unsupported file extension: .{ext}")
+
+    return ext
 
 
 def validate_text_length(text: str):
