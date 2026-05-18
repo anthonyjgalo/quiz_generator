@@ -3,15 +3,17 @@ from datetime import datetime
 from sqlalchemy import (
     JSON,
     Boolean,
+    Column,
     DateTime,
     Float,
     ForeignKey,
     Integer,
     String,
+    Table,
     Text,
     func,
 )
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -32,7 +34,7 @@ class LLMModel(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
     provider_id: Mapped[int] = mapped_column(
-        ForeignKey("llm_provider.id"), nullable=False
+        ForeignKey("llm_provider.id", ondelete="CASCADE"), nullable=False
     )
     ctx_window: Mapped[int] = mapped_column(Integer, nullable=False)
 
@@ -46,6 +48,29 @@ class LLMConnection(Base):
     api_key: Mapped[str] = mapped_column(String(255), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     model_id: Mapped[int] = mapped_column(ForeignKey("llm_model.id"), nullable=False)
+
+
+workspace_document = Table(
+    "workspace_document",
+    Base.metadata,
+    Column(
+        "workspace_id", ForeignKey("workspace.id", ondelete="CASCADE"), primary_key=True
+    ),
+    Column(
+        "document_id", ForeignKey("document.id", ondelete="CASCADE"), primary_key=True
+    ),
+)
+
+quiz_generation_document = Table(
+    "quiz_generation_document",
+    Base.metadata,
+    Column(
+        "quiz_generation_id",
+        ForeignKey("quiz_generation.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column("document_id", ForeignKey("document.id"), primary_key=True),
+)
 
 
 class Document(Base):
@@ -62,6 +87,12 @@ class Document(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
+    workspaces: Mapped[list["Workspace"]] = relationship(
+        secondary=workspace_document, back_populates="documents"
+    )
+    quiz_generations: Mapped[list["QuizGeneration"]] = relationship(
+        secondary=quiz_generation_document
+    )
 
 
 class Workspace(Base):
@@ -72,26 +103,11 @@ class Workspace(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
-    updated_at: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
-
-
-class WorkspaceDocument(Base):
-    __tablename__ = "workspace_document"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    workspace_id: Mapped[int] = mapped_column(
-        ForeignKey("workspace.id"), nullable=False
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now(), nullable=False
     )
-    document_id: Mapped[int] = mapped_column(ForeignKey("document.id"), nullable=False)
-
-
-class Quiz(Base):
-    __tablename__ = "quiz"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    name: Mapped[str] = mapped_column(String(50), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime, server_default=func.now(), nullable=False
+    documents: Mapped[list["Document"]] = relationship(
+        secondary=workspace_document, back_populates="workspaces"
     )
 
 
@@ -108,17 +124,19 @@ class QuizGeneration(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
-    quiz_id: Mapped[int] = mapped_column(ForeignKey("quiz.id"), nullable=False)
 
 
-class QuizGenerationDocument(Base):
-    __tablename__ = "quiz_generation_document"
+class Quiz(Base):
+    __tablename__ = "quiz"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    generation_id: Mapped[int] = mapped_column(
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
+    quiz_generation_id: Mapped[int] = mapped_column(
         ForeignKey("quiz_generation.id"), nullable=False
     )
-    document_id: Mapped[int] = mapped_column(ForeignKey("document.id"), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), nullable=False
+    )
 
 
 class Question(Base):
@@ -130,7 +148,9 @@ class Question(Base):
     correct_answer: Mapped[dict] = mapped_column(JSON, nullable=False)
     options: Mapped[dict] = mapped_column(JSON, nullable=False)
     feedback: Mapped[str] = mapped_column(Text, nullable=False)
-    quiz_id: Mapped[int] = mapped_column(ForeignKey("quiz.id"), nullable=False)
+    quiz_id: Mapped[int] = mapped_column(
+        ForeignKey("quiz.id", ondelete="CASCADE"), nullable=False
+    )
 
 
 class QuizAttempt(Base):
@@ -141,7 +161,9 @@ class QuizAttempt(Base):
         DateTime, server_default=func.now(), nullable=False
     )
     score: Mapped[int] = mapped_column(Integer, nullable=False)
-    quiz_id: Mapped[int] = mapped_column(ForeignKey("quiz.id"), nullable=False)
+    quiz_id: Mapped[int] = mapped_column(
+        ForeignKey("quiz.id", ondelete="CASCADE"), nullable=False
+    )
 
 
 class QuestionAnswer(Base):
@@ -149,7 +171,9 @@ class QuestionAnswer(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_answer: Mapped[dict] = mapped_column(JSON, nullable=False)
-    question_id: Mapped[int] = mapped_column(ForeignKey("question.id"), nullable=False)
+    question_id: Mapped[int] = mapped_column(
+        ForeignKey("question.id", ondelete="CASCADE"), nullable=False
+    )
     attempt_id: Mapped[int] = mapped_column(
-        ForeignKey("quiz_attempt.id"), nullable=False
+        ForeignKey("quiz_attempt.id", ondelete="CASCADE"), nullable=False
     )
