@@ -116,7 +116,7 @@ class QuizGeneration(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     model_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    user_instructions: Mapped[str] = mapped_column(Text, nullable=False)
+    user_instructions: Mapped[str] = mapped_column(Text, nullable=True)
     temperature: Mapped[float] = mapped_column(Float, nullable=False)
     max_tokens: Mapped[int] = mapped_column(Integer, nullable=False)
     provider_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -124,6 +124,10 @@ class QuizGeneration(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
+    keywords: Mapped[list | None] = mapped_column(JSON, default=list)
+    difficulty_level: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # basic | intermediate | advanced
 
 
 class Quiz(Base):
@@ -137,6 +141,7 @@ class Quiz(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
+    questions: Mapped[list["Question"]] = relationship()
 
 
 class Question(Base):
@@ -144,8 +149,10 @@ class Question(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     text: Mapped[str] = mapped_column(Text, nullable=False)
-    type: Mapped[str] = mapped_column(String(50), nullable=False)
-    correct_answer: Mapped[dict] = mapped_column(JSON, nullable=False)
+    type: Mapped[str] = mapped_column(
+        String(50), nullable=False
+    )  # single_choice | multiple_choice | True/False
+    correct_answer: Mapped[list] = mapped_column(JSON, nullable=False)
     options: Mapped[dict] = mapped_column(JSON, nullable=False)
     feedback: Mapped[str] = mapped_column(Text, nullable=False)
     quiz_id: Mapped[int] = mapped_column(

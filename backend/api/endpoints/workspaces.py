@@ -19,9 +19,7 @@ def get_workspaces(db: Session = Depends(get_db)):
 @router.get("/{workspace_id}", response_model=WorkspaceRead)
 def get_workspace_by_id(workspace_id: int, db: Session = Depends(get_db)):
     workspace_service = WorkspaceService(db)
-    w = workspace_service.get_or_404(workspace_id)
-    print(f"w.documents = {w.documents}")
-    return w
+    return workspace_service.get_or_404(workspace_id)
 
 
 @router.post("", response_model=WorkspaceRead)

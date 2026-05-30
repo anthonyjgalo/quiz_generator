@@ -10,6 +10,7 @@ from core.constants import (
     DOC_VEC_DB_PATH,
     EMB_MODEL_NAME,
     EMB_MODEL_SAVE_DIR,
+    RESULTS_PER_QUESTION,
     VEC_DB_COLLECTION,
 )
 from sentence_transformers import SentenceTransformer
@@ -83,7 +84,7 @@ def save_document_content(doc_id: int, content: str):
 def get_document_context(doc_id: int, query_text: str, question_qty: int):
     chunker = get_chunker()
     query_embeddings = chunker.embedding_model.embed(query_text)
-    n_res = question_qty * 3
+    n_res = question_qty * RESULTS_PER_QUESTION
 
     collection = get_collection()
 

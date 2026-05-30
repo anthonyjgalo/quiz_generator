@@ -1,5 +1,5 @@
 from db.models import Document, Workspace
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from schemas.workspace import WorkspaceCreate, WorkspaceUpdate
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -22,8 +22,8 @@ class WorkspaceService(BaseService[Workspace]):
 
         if missing:
             raise HTTPException(
-                400,
-                f"Documents with ids {missing} that are being attempted to be used do not exist.",
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=f"Documents with ids {missing} that are being attempted to be used do not exist.",
             )
 
         workspace = Workspace(name=workspace_create.name, documents=documents)
@@ -49,8 +49,8 @@ class WorkspaceService(BaseService[Workspace]):
 
             if missing:
                 raise HTTPException(
-                    400,
-                    f"Documents with ids {missing} that are being attempted to be used do not exist.",
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                    detail=f"Documents with ids {missing} that are being attempted to be used do not exist.",
                 )
 
             workspace.documents = list(documents)
