@@ -44,7 +44,7 @@ class QuestionRead(BaseModel):
     text: str
     type: str
     options: dict
-    correct_answer: list
+    correct_answer: List[str]
     feedback: str
     # quiz_id: int
 

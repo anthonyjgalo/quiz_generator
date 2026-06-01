@@ -1,3 +1,4 @@
+from api.endpoints.attempts import router as quiz_attempts_router
 from api.endpoints.connections import router as llm_connections_router
 from api.endpoints.documents import router as document_router
 from api.endpoints.providers import router as llm_providers_router
@@ -16,6 +17,7 @@ app.include_router(document_router, prefix=API_PREFIX)
 app.include_router(workspaces_router, prefix=API_PREFIX)
 app.include_router(quizzes_router, prefix=API_PREFIX)
 app.include_router(quiz_gen_router, prefix=API_PREFIX)
+app.include_router(quiz_attempts_router, prefix=API_PREFIX)
 
 
 @app.get(API_PREFIX)

@@ -1,29 +1,31 @@
+from datetime import datetime
+from typing import List
+
 from pydantic import BaseModel, ConfigDict
 
 
-class AnswerRead(BaseModel):
+class QuizAnswerRead(BaseModel):
     id: int
-    user_answer: dict
+    user_answer: list
     question_id: int
-    attempt_id: int
 
     model_config = ConfigDict(from_attributes=True)
 
 
-class AnswerCreate(BaseModel):
+class QuizAnswerCreate(BaseModel):
     question_id: int
-    user_answer: dict
+    user_answer: list
 
 
-class AttemptCreate(BaseModel):
-    score: int
-    answers: list[AnswerCreate]
+class QuizAttemptCreate(BaseModel):
+    answers: list[QuizAnswerCreate]
 
 
-class AttemptRead(BaseModel):
+class QuizAttemptRead(BaseModel):
     id: int
     score: int
-    created_at: str
+    created_at: datetime
     quiz_id: int
+    answers: List[QuizAnswerRead]
 
     model_config = ConfigDict(from_attributes=True)

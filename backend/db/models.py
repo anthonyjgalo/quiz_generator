@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from sqlalchemy import (
     JSON,
@@ -152,7 +153,7 @@ class Question(Base):
     type: Mapped[str] = mapped_column(
         String(50), nullable=False
     )  # single_choice | multiple_choice | True/False
-    correct_answer: Mapped[list] = mapped_column(JSON, nullable=False)
+    correct_answer: Mapped[List[str]] = mapped_column(JSON, nullable=False)
     options: Mapped[dict] = mapped_column(JSON, nullable=False)
     feedback: Mapped[str] = mapped_column(Text, nullable=False)
     quiz_id: Mapped[int] = mapped_column(
@@ -171,13 +172,14 @@ class QuizAttempt(Base):
     quiz_id: Mapped[int] = mapped_column(
         ForeignKey("quiz.id", ondelete="CASCADE"), nullable=False
     )
+    answers: Mapped[List["QuestionAnswer"]] = relationship()
 
 
 class QuestionAnswer(Base):
     __tablename__ = "question_answer"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    user_answer: Mapped[dict] = mapped_column(JSON, nullable=False)
+    user_answer: Mapped[List[str]] = mapped_column(JSON, nullable=False)
     question_id: Mapped[int] = mapped_column(
         ForeignKey("question.id", ondelete="CASCADE"), nullable=False
     )
