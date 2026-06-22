@@ -2,6 +2,7 @@ from typing import Generic, Type, TypeVar
 
 from fastapi import HTTPException
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.orm import DeclarativeBase, Session
 
 ModelType = TypeVar("ModelType", bound=DeclarativeBase)
@@ -13,7 +14,7 @@ class BaseService(Generic[ModelType]):
         self.model = model
 
     def get_or_404(self, id: int) -> ModelType:
-        obj = self.session.query(self.model).get(id)
+        obj = self.session.get(self.model, id)
 
         if not obj:
             raise HTTPException(
@@ -23,7 +24,7 @@ class BaseService(Generic[ModelType]):
         return obj
 
     def get_all(self):
-        return self.session.query(self.model).all()
+        return self.session.scalars(select(self.model)).all()
 
     def create(self, schema_create: BaseModel):
         create_dict = schema_create.model_dump()

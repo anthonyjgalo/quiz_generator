@@ -5,11 +5,19 @@ from api.endpoints.providers import router as llm_providers_router
 from api.endpoints.quizzes import quiz_gen_router
 from api.endpoints.quizzes import router as quizzes_router
 from api.endpoints.workspaces import router as workspaces_router
+from core.constants import API_PREFIX
 from fastapi import FastAPI
-
-API_PREFIX = "/api"
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="Quiz Generator")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(llm_providers_router, prefix=API_PREFIX)
 app.include_router(llm_connections_router, prefix=API_PREFIX)

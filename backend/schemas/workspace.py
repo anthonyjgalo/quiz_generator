@@ -1,17 +1,17 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from schemas.document import DocumentRead
 
 
 class WorkspaceCreate(BaseModel):
-    name: str
+    name: str = Field(min_length=1, max_length=50)
     document_ids: list[int] = []
 
 
 class WorkspaceUpdate(BaseModel):
-    name: str | None = None
+    name: str | None = Field(default=None, min_length=1, max_length=50)
     document_ids: list[int] | None = None
 
 

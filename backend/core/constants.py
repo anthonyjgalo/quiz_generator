@@ -1,9 +1,11 @@
-import os
+from pathlib import Path
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+API_PREFIX = "/api"
+
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 # RAG
-DOC_VEC_DB_PATH = os.path.join(BASE_DIR, "data", "doc_vec_db")
+DOC_VEC_DB_PATH = BASE_DIR / "data" / "doc_vec_db"
 VEC_DB_COLLECTION = "documents"
 RESULTS_PER_QUESTION = 3
 
@@ -13,7 +15,7 @@ MAX_SIZE = 10 * 1024 * 1024
 
 # Embedding Model
 EMB_MODEL_NAME = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-EMB_MODEL_SAVE_DIR = os.path.join(BASE_DIR, ".emb_model")
+EMB_MODEL_SAVE_DIR = BASE_DIR / ".emb_model"
 
 # Quiz Generations
 MAX_DIRECT_CHARS = 10_000
@@ -25,5 +27,5 @@ QUESTION_FIXED_LIMITS = [
     ((5_001, 10_000), 15),
     ((10_001, 20_000), 20),
     ((20_001, 50_000), 30),
-    ((50_0001, 100_000), 50),
+    ((50_001, 100_000), 50),
 ]

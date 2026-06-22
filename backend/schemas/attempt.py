@@ -14,7 +14,7 @@ class QuizAnswerRead(BaseModel):
 
 class QuizAnswerCreate(BaseModel):
     question_id: int
-    user_answer: list
+    user_answer: List[str]
 
 
 class QuizAttemptCreate(BaseModel):

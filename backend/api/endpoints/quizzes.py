@@ -1,6 +1,4 @@
-from typing import List
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from schemas.quiz import QuizGenerateRequest, QuizGenerationRead, QuizRead
 from services.quiz import QuizService
 from sqlalchemy.orm import Session
@@ -10,7 +8,7 @@ from api.deps import get_db
 router = APIRouter(prefix="/quizzes", tags=["quizzes"])
 
 
-@router.get("", response_model=List[QuizRead])
+@router.get("", response_model=list[QuizRead])
 def get_quizzes(db: Session = Depends(get_db)):
     quiz_service = QuizService(db)
     return quiz_service.get_all()
@@ -22,13 +20,13 @@ def get_quiz_by_id(quiz_id: int, db: Session = Depends(get_db)):
     return quiz_service.get_or_404(quiz_id)
 
 
-@router.post("", response_model=QuizRead)
+@router.post("", response_model=QuizRead, status_code=status.HTTP_201_CREATED)
 def generate_quiz(quiz_gen_req: QuizGenerateRequest, db: Session = Depends(get_db)):
     quiz_service = QuizService(db)
     return quiz_service.generate_quiz(quiz_gen_req)
 
 
-@router.delete("/{quiz_id}")
+@router.delete("/{quiz_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_quiz(quiz_id: int, db: Session = Depends(get_db)):
     quiz_service = QuizService(db)
     quiz_service.delete(quiz_id)
@@ -43,7 +41,7 @@ def get_quiz_generation_by_id(quiz_id: int, db: Session = Depends(get_db)):
 quiz_gen_router = APIRouter(prefix="/quiz-generations", tags=["quiz-generations"])
 
 
-@quiz_gen_router.get("", response_model=List[QuizGenerationRead])
+@quiz_gen_router.get("", response_model=list[QuizGenerationRead])
 def get_quiz_generations(db: Session = Depends(get_db)):
     quiz_service = QuizService(db)
     return quiz_service.get_quiz_generations()

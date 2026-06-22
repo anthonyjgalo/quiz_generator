@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class LLMProviderRead(BaseModel):
@@ -19,5 +19,6 @@ class LLMModelRead(BaseModel):
 
 
 class LLMModelCreate(BaseModel):
-    name: str
-    ctx_window: int
+    name: str = Field(min_length=1, max_length=50)
+    ctx_window: int = Field(gt=0)
+    provider_id: int | None = None

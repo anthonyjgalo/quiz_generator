@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import List
+from typing import List, Literal
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QuizGenerateRequest(BaseModel):
@@ -9,10 +9,12 @@ class QuizGenerateRequest(BaseModel):
     connection_id: int
     question_distribution: dict
     user_instructions: str | None = None
-    temperature: float = 0.7
-    max_tokens: int = 1000
+    temperature: float = Field(default=0.7, ge=0.0, le=1.0)
+    max_tokens: int = Field(default=1_000, ge=1000)  # TODO: to validate
     keywords: List[str] | None
-    difficulty_level: str
+    difficulty_level: Literal["basic", "intermediate", "advanced"] = Field(
+        default="basic"
+    )
 
 
 class QuizRead(BaseModel):

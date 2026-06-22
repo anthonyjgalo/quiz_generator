@@ -70,7 +70,9 @@ quiz_generation_document = Table(
         ForeignKey("quiz_generation.id", ondelete="CASCADE"),
         primary_key=True,
     ),
-    Column("document_id", ForeignKey("document.id"), primary_key=True),
+    Column(
+        "document_id", ForeignKey("document.id", ondelete="RESTRICT"), primary_key=True
+    ),
 )
 
 
@@ -125,7 +127,7 @@ class QuizGeneration(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
-    keywords: Mapped[list | None] = mapped_column(JSON, default=list)
+    keywords: Mapped[List[str]] = mapped_column(JSON, default=list)
     difficulty_level: Mapped[str] = mapped_column(
         String(50), nullable=False
     )  # basic | intermediate | advanced
@@ -142,7 +144,7 @@ class Quiz(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now(), nullable=False
     )
-    questions: Mapped[list["Question"]] = relationship()
+    questions: Mapped[list["Question"]] = relationship(cascade="all, delete-orphan")
 
 
 class Question(Base):

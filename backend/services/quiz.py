@@ -25,6 +25,7 @@ from fastapi import HTTPException, status
 from llm import prompt, rag
 from llm.client import LLMService
 from schemas.quiz import QuizGenerateRequest
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from services.base import BaseService
@@ -123,7 +124,7 @@ class QuizService(BaseService[Quiz]):
     def _create_questions(questions: List[dict], quiz_id: int):
         questions_obj = []
         for question in questions:
-            question_obj = Question(
+            new_question_obj = Question(
                 **{
                     "type": question["type"],
                     "text": question["question_text"],
@@ -133,7 +134,7 @@ class QuizService(BaseService[Quiz]):
                     "quiz_id": quiz_id,
                 }
             )
-            questions_obj.append(question_obj)
+            questions_obj.append(new_question_obj)
 
         return questions_obj
 
@@ -141,12 +142,14 @@ class QuizService(BaseService[Quiz]):
         documents = self._get_workspace_documents(gen_req.workspace_id)
         llm_connection = self._get_llm_connection(gen_req.connection_id)
         direct_content_len = sum([doc.char_count for doc in documents])
-        total_questions = self._get_total_questions(gen_req.question_distribution)
-        self._validate_question_qty(total_questions, direct_content_len)
+        total_questions = QuizService._get_total_questions(
+            gen_req.question_distribution
+        )
+        QuizService._validate_question_qty(total_questions, direct_content_len)
 
         keywords = ",".join(gen_req.keywords or [])
 
-        quiz_content = self._get_content_by_threshold(
+        quiz_content = QuizService._get_content_by_threshold(
             documents,
             keywords or DEFAULT_USER_INSTRUCTIONS,
             total_questions,
@@ -178,13 +181,14 @@ class QuizService(BaseService[Quiz]):
             max_tokens=gen_req.max_tokens,
         )
 
-        if not llm_model_response:
+        try:
+            quiz_data = json.loads(llm_model_response or "")
+        except (json.JSONDecodeError, TypeError):
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
-                detail="The AI provider returned an empty or invalid response. Please try again.",
+                detail="The AI provider returned an empty or invalid response structure. Please try again.",
             )
 
-        quiz_data = json.loads(llm_model_response)
         llm_provider = self._get_llm_provider(llm_model.provider_id)
 
         quiz_generation = QuizGeneration(
@@ -225,4 +229,9 @@ class QuizService(BaseService[Quiz]):
         return quiz_generation
 
     def get_quiz_generations(self):
-        return self.session.query(QuizGeneration).all()
+        return self.session.scalars(select(QuizGeneration)).all()
+
+    def delete(self, id: int):
+        quiz_generation = self.get_quiz_generations_by_quiz(id)
+        self.session.delete(quiz_generation)
+        super().delete(id)

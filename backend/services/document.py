@@ -1,7 +1,7 @@
 import io
 
-from core.exceptions import DocumentLinkedError
 import llm.rag as rag_service
+from core.exceptions import DocumentLinkedError
 from db.models import Document
 from docx import Document as WordDocument
 from fastapi import File, UploadFile
@@ -65,7 +65,8 @@ class DocumentService(BaseService[Document]):
 
         return text.strip()
 
-    def _process_file(self, file: UploadFile = File(...)):
+    @staticmethod
+    def _process_file(file: UploadFile = File(...)):
         if not file.filename:
             raise ValueError("File must have a name")
 
@@ -74,11 +75,11 @@ class DocumentService(BaseService[Document]):
         content = file.file.read()
 
         if ext == "pdf":
-            return (ext, self._process_pdf_file(content))
+            return (ext, DocumentService._process_pdf_file(content))
         elif ext == "docx":
-            return (ext, self._process_docx_file(content))
+            return (ext, DocumentService._process_docx_file(content))
 
-        return (ext, self._process_txt_file(content))
+        return (ext, DocumentService._process_txt_file(content))
 
     def create_document_by_paste(self, doc_create_paste: DocumentCreatePaste):
         validate_text_length(doc_create_paste.content)
@@ -96,7 +97,7 @@ class DocumentService(BaseService[Document]):
         return document
 
     def create_document_by_upload(self, file: UploadFile):
-        format, text = self._process_file(file)
+        format, text = DocumentService._process_file(file)
 
         validate_text_length(text)
 

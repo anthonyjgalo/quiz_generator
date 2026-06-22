@@ -1,4 +1,3 @@
-import os
 from functools import lru_cache
 from typing import cast
 
@@ -18,16 +17,16 @@ from sentence_transformers import SentenceTransformer
 
 @lru_cache(maxsize=1)
 def get_chunker():
-    if not os.path.exists(EMB_MODEL_SAVE_DIR):
-        os.makedirs(EMB_MODEL_SAVE_DIR, exist_ok=True)
+    if not EMB_MODEL_SAVE_DIR.exists():
+        EMB_MODEL_SAVE_DIR.mkdir(parents=True, exist_ok=True)
         print(f"📦 Downloading embedding model to {EMB_MODEL_SAVE_DIR} folder...")
         print("    This could take a while....")
         model = SentenceTransformer(EMB_MODEL_NAME)
-        model.save(EMB_MODEL_SAVE_DIR)
+        model.save(str(EMB_MODEL_SAVE_DIR))
         print("✅  Model ready.")
 
     return SemanticChunker(
-        embedding_model=EMB_MODEL_SAVE_DIR,
+        embedding_model=str(EMB_MODEL_SAVE_DIR),
         threshold=0.5,
         chunk_size=512,
         min_sentences_per_chunk=1,
@@ -42,7 +41,7 @@ def get_collection():
 
 @lru_cache(maxsize=1)
 def get_embedding_refinery():
-    return EmbeddingsRefinery(embedding_model=EMB_MODEL_SAVE_DIR)
+    return EmbeddingsRefinery(embedding_model=str(EMB_MODEL_SAVE_DIR))
 
 
 def save_document_content(doc_id: int, content: str):
@@ -71,7 +70,7 @@ def save_document_content(doc_id: int, content: str):
 
     metadatas_list = [
         {"doc_id": doc_id, "start_idx": chunk.start_index, "end_idx": chunk.end_index}
-        for chunk in chunks
+        for chunk in chnks_with_emb
     ]
 
     metadatas = cast(Metadatas, metadatas_list)
@@ -91,7 +90,7 @@ def get_document_context(doc_id: int, query_text: str, question_qty: int):
     results = collection.query(
         query_embeddings=query_embeddings,
         n_results=n_res,
-        where={"doc_id": doc_id},
+        where={"doc_id": {"$eq": doc_id}},
     )
 
     return results.get("documents", [[]])
@@ -99,4 +98,4 @@ def get_document_context(doc_id: int, query_text: str, question_qty: int):
 
 def delete_document_content(doc_id: int):
     collection = get_collection()
-    collection.delete(where={"doc_id": doc_id})
+    collection.delete(where={"doc_id": {"$eq": doc_id}})

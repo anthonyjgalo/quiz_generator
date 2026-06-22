@@ -16,6 +16,7 @@ class LLMService:
         user_prompt: str,
         temperature: float = 0.5,
         max_tokens: int = 1500,
+        require_json_response: bool = True,
     ):
         messages: List[ChatCompletionMessageParam] = [
             {"role": "system", "content": system_prompt},
@@ -27,7 +28,9 @@ class LLMService:
             temperature=temperature,
             messages=messages,
             max_tokens=max_tokens,
-            response_format={"type": "json_object"},
+            response_format={"type": "json_object"}
+            if require_json_response
+            else {"type": "text"},
         )
 
         return response.choices[0].message.content

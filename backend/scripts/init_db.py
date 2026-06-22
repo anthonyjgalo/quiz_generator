@@ -1,8 +1,3 @@
-import sys
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from db.models import Base
 from db.seed import seed_data
 from db.session import SessionLocal, engine
@@ -15,6 +10,10 @@ def init_db():
 
     try:
         seed_data(db)
+    except Exception as e:
+        db.rollback()
+        print(f"Error during data initialization: {e}")
+        raise e
     finally:
         db.close()
 

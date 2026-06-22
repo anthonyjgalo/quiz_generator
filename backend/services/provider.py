@@ -18,7 +18,9 @@ class ProviderService(BaseService):
     def create_llm_model_by_provider(
         self, provider_id: int, llm_model_create: LLMModelCreate
     ):
+        self.get_or_404(provider_id)
         model = LLMModel(**llm_model_create.model_dump(), provider_id=provider_id)
         self.session.add(model)
         self.session.commit()
+        self.session.refresh(model)
         return model

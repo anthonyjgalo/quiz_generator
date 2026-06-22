@@ -11,18 +11,17 @@ class ConnectionService(BaseService):
         super().__init__(session, LLMConnection)
 
     def test_llm_connection(self, connection_id: int):
-        connection = self.session.query(LLMConnection).get(connection_id)
-
-        if not connection:
-            raise ConnectionTestFailed("The connection must exist to test it")
+        connection = self.get_or_404(connection_id)
 
         if not connection.is_active:
             raise ConnectionTestFailed("The connection must be active to test it")
 
-        openai = OpenAI(base_url=connection.base_url, api_key=connection.api_key)
+        client = OpenAI(
+            base_url=connection.base_url, api_key=connection.api_key, timeout=5.0
+        )
 
         try:
-            openai.models.list()
+            client.models.list()
         except APIError as e:
             raise ConnectionTestFailed(f"API Error: {e.message}")
         except Exception as e:

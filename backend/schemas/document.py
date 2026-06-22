@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DocumentCreatePaste(BaseModel):
-    name: str
-    content: str
+    name: str = Field(min_length=1, max_length=150)
+    content: str = Field(min_length=200, max_length=50_000)
 
 
 class DocumentRead(BaseModel):

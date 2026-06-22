@@ -12,7 +12,7 @@ You MUST respond ONLY with a valid JSON object. Do not include any conversationa
     {
       "id": 1,
       "type": "single_choice | multiple_choice | true_false",
-      "question_text": "string",
+      "text": "string",
       "options": { "a": "string", "b": "string", "c": "string", "d": "string" }, 
       "correct_answer": ["string"], 
       "feedback": "string"
@@ -23,7 +23,7 @@ You MUST respond ONLY with a valid JSON object. Do not include any conversationa
 ### RULES
 1. QUESTION TYPES: 
    - multiple_choice: 4 options, 1 or more correct.
-   - true_false: options 'a' as True, 'b' as False.
+   - true_false: options MUST contain ONLY 'a' as True and 'b' as False.
    - single_choice: 4 options, 1 correct.
 2. SOURCE TRUTH: Use ONLY the provided context. If the context is insufficient, do not hallucinate; generate fewer questions instead.
 3. LANGUAGE: Generate the content (question_text, options, explanation) in the same language as the provided context.
@@ -44,19 +44,14 @@ def build_prompt(
     config_details += f"- Difficulty Level: {difficulty_level}\n"
     config_details += "- Questions Distribution:\n"
 
-    # grouped_question_types = defaultdict(int)
-    # for question_type, question_qty in questions_cfg.items():
-    #     grouped_question_types[question_type] += question_qty
-
     for qtype, qty in questions_cfg.get("question_types", {}).items():
         config_details += f"\t* {qtype}: {qty}\n"
 
-    user_prompt = f"""
-REFERENCE CONTEXT: {ctx_text}
+    user_prompt = (
+        f"REFERENCE CONTEXT\n\n{ctx_text}\nQUIZ REQUIREMENTS\n\n{config_details}"
+    )
 
-QUIZ REQUIREMENTS
-{config_details}
-
-{f"ADDITIONAL INSTRUCTIONS \n\n {user_instructions}" if user_instructions else ""}"""
+    if user_instructions:
+        user_prompt += f"\nADDITIONAL INSTRUCTIONS:\n\n{user_instructions}"
 
     return user_prompt
